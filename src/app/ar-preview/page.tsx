@@ -10,6 +10,7 @@ export default function ARPreviewPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [casePosition, setCasePosition] = useState({ x: 50, y: 50, scale: 1 });
     const [selectedDesign, setSelectedDesign] = useState(0);
+    const [stream, setStream] = useState<MediaStream | null>(null);
 
     const videoRef = useRef<HTMLVideoElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -26,32 +27,38 @@ export default function ARPreviewPage() {
         setCameraError(null);
 
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({
+            const mediaStream = await navigator.mediaDevices.getUserMedia({
                 video: {
-                    facingMode: 'environment', // Use back camera on mobile
+                    facingMode: 'environment',
                     width: { ideal: 1280 },
                     height: { ideal: 720 },
                 },
             });
 
-            if (videoRef.current) {
-                videoRef.current.srcObject = stream;
-                await videoRef.current.play();
-                setCameraActive(true);
-            }
+            setStream(mediaStream);
+            setCameraActive(true);
         } catch (error) {
             console.error('Camera error:', error);
-            setCameraError('لم نتمكن من الوصول للكاميرا. تأكد من إعطاء الإذن.');
+            setCameraError('لم نتمكن من الوصول للكاميرا. تأكد من إعطاء الإذن واستخدام متصفح يدعم الكاميرا.');
         } finally {
             setIsLoading(false);
         }
     };
 
+    // Attach stream to video element when it becomes available
+    useEffect(() => {
+        if (cameraActive && stream && videoRef.current) {
+            videoRef.current.srcObject = stream;
+            videoRef.current.play().catch(err => {
+                console.error("Error playing video:", err);
+            });
+        }
+    }, [cameraActive, stream]);
+
     const stopCamera = () => {
-        if (videoRef.current?.srcObject) {
-            const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
-            tracks.forEach(track => track.stop());
-            videoRef.current.srcObject = null;
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+            setStream(null);
         }
         setCameraActive(false);
     };
@@ -61,8 +68,8 @@ export default function ARPreviewPage() {
         if (!containerRef.current) return;
 
         const rect = containerRef.current.getBoundingClientRect();
-        const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
-        const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+        const clientX = 'touches' in e ? (e as React.TouchEvent).touches[0].clientX : (e as React.MouseEvent).clientX;
+        const clientY = 'touches' in e ? (e as React.TouchEvent).touches[0].clientY : (e as React.MouseEvent).clientY;
 
         const x = ((clientX - rect.left) / rect.width) * 100;
         const y = ((clientY - rect.top) / rect.height) * 100;
@@ -73,12 +80,11 @@ export default function ARPreviewPage() {
     // Cleanup on unmount
     useEffect(() => {
         return () => {
-            if (videoRef.current?.srcObject) {
-                const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
-                tracks.forEach(track => track.stop());
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
             }
         };
-    }, []);
+    }, [stream]);
 
     // Check if mobile
     const [isMobile, setIsMobile] = useState(true);
