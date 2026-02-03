@@ -3,9 +3,9 @@ import { Sparkles, Camera, Upload, Printer, Truck, MapPin, ArrowLeft } from 'luc
 
 // Phone models data
 const phoneModels = [
-  { brand: 'iPhone', models: ['iPhone 11', 'iPhone 12', 'iPhone 13', 'iPhone 14', 'iPhone 15', 'iPhone 15 Pro'] },
-  { brand: 'Samsung', models: ['Galaxy S21', 'Galaxy S22', 'Galaxy S23', 'Galaxy A52', 'Galaxy A53', 'Galaxy A54'] },
-  { brand: 'Xiaomi', models: ['Redmi Note 11', 'Redmi Note 12', 'Redmi Note 13', 'Poco X5', 'Poco X6', 'Mi 13'] },
+  { brand: 'iPhone', models: ['iPhone 12', 'iPhone 13', 'iPhone 14', 'iPhone 15', 'iPhone 16 Pro Max'] },
+  { brand: 'Samsung S', models: ['Galaxy S21', 'Galaxy S22', 'Galaxy S23', 'Galaxy S24 Ultra'] },
+  { brand: 'Samsung A', models: ['Galaxy A15', 'Galaxy A34', 'Galaxy A54', 'Galaxy A55'] },
 ];
 
 const features = [
