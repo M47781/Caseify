@@ -24,7 +24,7 @@ export default function StatCard({ label, value, icon: Icon, trend, colorClass =
                     {trend && (
                         <span className={`text-xs font-bold px-2 py-1 rounded-full ${trend.isUp ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
                             }`}>
-                            {trend.isUp ? '↑' : '↓'} {trend.trend}
+                            {trend.isUp ? '↑' : '↓'} {trend.value}
                         </span>
                     )}
                 </div>

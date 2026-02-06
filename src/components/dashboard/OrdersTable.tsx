@@ -1,13 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     MessageCircle,
     ExternalLink,
     MoreVertical,
     Search,
-    Filter,
-    ArrowRight
+    Filter
 } from 'lucide-react';
 import { formatPrice } from '@/lib/utils';
 
@@ -23,11 +22,18 @@ const mockOrders = [
 export default function OrdersTable() {
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('all');
+    const [orders, setOrders] = useState([...mockOrders]);
 
-    const filteredOrders = mockOrders.filter(order => {
-        const matchesSearch = order.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            order.phone.includes(searchTerm) ||
-            order.id.toLowerCase().includes(searchTerm.toLowerCase());
+    useEffect(() => {
+        // Load real orders from localStorage
+        const storedOrders = JSON.parse(localStorage.getItem('caseify_orders') || '[]');
+        setOrders([...storedOrders, ...mockOrders]);
+    }, []);
+
+    const filteredOrders = orders.filter(order => {
+        const matchesSearch = (order.name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+            (order.phone || '').includes(searchTerm) ||
+            (order.id?.toLowerCase() || '').includes(searchTerm.toLowerCase());
         const matchesStatus = filterStatus === 'all' || order.status === filterStatus;
         return matchesSearch && matchesStatus;
     });
@@ -54,8 +60,8 @@ export default function OrdersTable() {
                             key={status}
                             onClick={() => setFilterStatus(status)}
                             className={`px-4 py-2 rounded-lg text-sm font-bold whitespace-nowrap transition-all ${filterStatus === status
-                                    ? 'bg-mint text-white shadow-lg shadow-mint/20'
-                                    : 'bg-white text-gray-500 hover:bg-gray-50 border border-gray-100'
+                                ? 'bg-mint text-white shadow-lg shadow-mint/20'
+                                : 'bg-white text-gray-500 hover:bg-gray-50 border border-gray-100'
                                 }`}
                         >
                             {status === 'all' ? 'الكل' :
@@ -94,8 +100,8 @@ export default function OrdersTable() {
                                         <td className="px-6 py-4 font-bold text-mint">{formatPrice(order.price)}</td>
                                         <td className="px-6 py-4">
                                             <span className={`inline-flex px-3 py-1 rounded-full text-xs font-bold ${order.status === 'new' ? 'bg-yellow-100 text-yellow-700' :
-                                                    order.status === 'confirmed' ? 'bg-green-100 text-green-700' :
-                                                        'bg-red-100 text-red-700'
+                                                order.status === 'confirmed' ? 'bg-green-100 text-green-700' :
+                                                    'bg-red-100 text-red-700'
                                                 }`}>
                                                 {order.status === 'new' ? 'جديد 🟡' :
                                                     order.status === 'confirmed' ? 'مؤكد 🟢' : 'ملغى 🔴'}

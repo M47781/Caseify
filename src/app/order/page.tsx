@@ -82,6 +82,22 @@ export default function OrderPage() {
             ...orderData,
         }));
 
+        // Capture order for dashboard (localStorage for persistent MVP)
+        const newOrder = {
+            id: `ORD${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`,
+            name: formData.name,
+            phone: formData.phone,
+            wilaya: formData.wilaya,
+            model: orderData.model,
+            price: orderData.price,
+            status: 'new',
+            date: new Date().toISOString().split('T')[0],
+            design: orderData.hasDesign ? 'Custom' : 'None'
+        };
+
+        const existingOrders = JSON.parse(localStorage.getItem('caseify_orders') || '[]');
+        localStorage.setItem('caseify_orders', JSON.stringify([newOrder, ...existingOrders]));
+
         // Small delay for UX
         await new Promise(resolve => setTimeout(resolve, 500));
 

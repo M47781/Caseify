@@ -1,10 +1,31 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Sidebar from '@/components/dashboard/Sidebar';
+import AdminLogin from '@/components/dashboard/AdminLogin';
 
 export default function DashboardLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [isChecking, setIsChecking] = useState(true);
+
+    useEffect(() => {
+        const auth = localStorage.getItem('caseify_admin_auth');
+        if (auth === 'true') {
+            setIsAuthenticated(true);
+        }
+        setIsChecking(false);
+    }, []);
+
+    if (isChecking) return <div className="min-h-screen bg-gray-900" />;
+
+    if (!isAuthenticated) {
+        return <AdminLogin onLogin={() => setIsAuthenticated(true)} />;
+    }
+
     return (
         <div className="flex min-h-screen bg-gray-50 border-t border-gray-100">
             <Sidebar />

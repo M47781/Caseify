@@ -1,29 +1,46 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import {
     ShoppingBag,
     CheckCircle,
     Smartphone,
     ImageIcon,
     TrendingUp,
-    Clock,
-    ArrowLeft
+    Clock
 } from 'lucide-react';
 import StatCard from '@/components/dashboard/StatCard';
 import Link from 'next/link';
 import { formatPrice } from '@/lib/utils';
 
 export default function DashboardOverview() {
-    // Mock data for MVP
-    const stats = [
-        { label: 'إجمالي الطلبات', value: 124, icon: ShoppingBag, color: 'bg-blue-500' },
-        { label: 'طلبات مؤكدة', value: 86, icon: CheckCircle, color: 'bg-green-500' },
-        { label: 'أكثر موديل مطلوب', value: 'iPhone 15 Pro', icon: Smartphone, color: 'bg-purple-500' },
-        { label: 'تصاميم مرفوعة', value: 312, icon: ImageIcon, color: 'bg-orange-500' },
-    ];
+    const [orders, setOrders] = useState<any[]>([]);
+    const [stats, setStats] = useState([
+        { label: 'إجمالي الطلبات', value: 0, icon: ShoppingBag, color: 'bg-blue-500' },
+        { label: 'طلبات مؤكدة', value: 0, icon: CheckCircle, color: 'bg-green-500' },
+        { label: 'أكثر موديل مطلوب', value: '...', icon: Smartphone, color: 'bg-purple-500' },
+        { label: 'تصاميم مرفوعة', value: 0, icon: ImageIcon, color: 'bg-orange-500' },
+    ]);
 
-    const recentOrders = [
+    useEffect(() => {
+        const stored = JSON.parse(localStorage.getItem('caseify_orders') || '[]');
+        setOrders(stored.slice(0, 5));
+
+        // Calculate basic stats
+        const total = stored.length;
+        const confirmed = stored.filter((o: any) => o.status === 'confirmed').length;
+
+        setStats([
+            { label: 'إجمالي الطلبات', value: total, icon: ShoppingBag, color: 'bg-blue-500' },
+            { label: 'طلبات مؤكدة', value: confirmed, icon: CheckCircle, color: 'bg-green-500' },
+            { label: 'أحدث طراز', value: stored[0]?.model || 'لا يوجد', icon: Smartphone, color: 'bg-purple-500' },
+            { label: 'تصاميم جديدة', value: total, icon: ImageIcon, color: 'bg-orange-500' },
+        ]);
+    }, []);
+
+    const recentOrders = orders.length > 0 ? orders : [
         { id: 'ORD001', name: 'أحمد بن علي', model: 'iPhone 15 Pro', status: 'new', date: 'منذ ساعتين', price: 2800 },
         { id: 'ORD002', name: 'سارة محمد', model: 'Galaxy S24 Ultra', status: 'confirmed', date: 'منذ 5 ساعات', price: 3300 },
-        { id: 'ORD003', name: 'ياسين بلال', model: 'iPhone 13', status: 'cancelled', date: 'منذ يوم', price: 2500 },
     ];
 
     return (
@@ -79,8 +96,8 @@ export default function DashboardOverview() {
                                         <td className="py-4 font-bold text-gray-900">{formatPrice(order.price)}</td>
                                         <td className="py-4">
                                             <span className={`px-3 py-1 rounded-full text-xs font-bold ${order.status === 'new' ? 'bg-yellow-100 text-yellow-700' :
-                                                    order.status === 'confirmed' ? 'bg-green-100 text-green-700' :
-                                                        'bg-red-100 text-red-700'
+                                                order.status === 'confirmed' ? 'bg-green-100 text-green-700' :
+                                                    'bg-red-100 text-red-700'
                                                 }`}>
                                                 {order.status === 'new' ? 'جديد' :
                                                     order.status === 'confirmed' ? 'مؤكد' : 'ملغى'}
